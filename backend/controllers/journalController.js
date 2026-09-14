@@ -154,17 +154,17 @@ exports.getCalendarJournals = async (req, res) => {
 
 exports.autoSave = async (req, res) => {
   try {
-    const { title, content, plainText, category, tags } = req.body;
+    const { title, content, plainText, mood, category, tags } = req.body;
     let journal;
     if (req.params.id) {
       journal = await Journal.findOneAndUpdate(
         { _id: req.params.id, user: req.user.id },
-        { title, content, plainText, category, tags, isDraft: true },
+        { title, content, plainText, mood, category, tags, isDraft: true, wordCount: plainText ? plainText.split(/\s+/).filter(Boolean).length : 0 },
         { new: true }
       );
     } else {
       journal = await Journal.create({
-        user: req.user.id, title: title || 'Untitled Draft', content, plainText, category, tags, isDraft: true,
+        user: req.user.id, title: title || 'Untitled Draft', content, plainText, mood, category, tags, isDraft: true,
         wordCount: plainText ? plainText.split(/\s+/).filter(Boolean).length : 0
       });
     }

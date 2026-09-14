@@ -47,9 +47,9 @@ export default function EditJournalPage({ params }: { params: Promise<{ id: stri
   const autoSave = useCallback(async () => {
     if (!title && !content) return;
     try {
-      await api.put(`/journals/${id}`, { title, content, plainText, category: categoryId || undefined, tags: selectedTags, isDraft: true });
+      await api.put(`/journals/${id}`, { title, content, plainText, mood, category: categoryId || undefined, tags: selectedTags, isDraft: true });
     } catch { /* empty */ }
-  }, [id, title, content, plainText, categoryId, selectedTags]);
+  }, [id, title, content, plainText, mood, categoryId, selectedTags]);
 
   const handleContentChange = (value: string) => {
     setContent(value);
@@ -95,9 +95,14 @@ export default function EditJournalPage({ params }: { params: Promise<{ id: stri
     <div className="max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Edit Journal Entry</h1>
-        <button onClick={() => handleSave(true)} disabled={saving} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50">
-          {saving ? 'Saving...' : 'Save Draft'}
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => handleSave(true)} disabled={saving} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 disabled:opacity-50">
+            {saving ? 'Saving...' : 'Save Draft'}
+          </button>
+          <button onClick={() => handleSave(false)} disabled={saving} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50">
+            {saving ? 'Posting...' : 'Post'}
+          </button>
+        </div>
       </div>
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <input type="text" placeholder="Journal title..." value={title} onChange={e => setTitle(e.target.value)} className="w-full px-6 py-4 text-xl font-semibold border-b border-gray-200 outline-none" />

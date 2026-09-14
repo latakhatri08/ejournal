@@ -31,10 +31,10 @@ export default function NewJournalPage() {
   const autoSave = useCallback(async () => {
     if (!title && !content) return;
     try {
-      const data = await api.post(`/journals/auto-save${draftId ? '/' + draftId : ''}`, { title, content, plainText, category: categoryId || undefined, tags: selectedTags });
+      const data = await api.post(`/journals/auto-save${draftId ? '/' + draftId : ''}`, { title, content, plainText, mood, category: categoryId || undefined, tags: selectedTags });
       if (data.journal?._id) setDraftId(data.journal._id);
     } catch { /* empty */ }
-  }, [title, content, plainText, categoryId, selectedTags, draftId]);
+  }, [title, content, plainText, mood, categoryId, selectedTags, draftId]);
 
   const handleContentChange = (value: string) => {
     setContent(value);
@@ -61,7 +61,13 @@ export default function NewJournalPage() {
   const handleSave = async (isDraft: boolean) => {
     setSaving(true);
     try {
-      await api.post('/journals', { title, content, plainText, mood, category: categoryId || undefined, tags: selectedTags, isDraft });
+      const body = { title, content, plainText, mood, category: categoryId || undefined, tags: selectedTags, isDraft };
+      if (draftId) {
+        await api.put(`/journals/${draftId}`, body);
+      } else {
+        const data = await api.post('/journals', body);
+        if (data.journal?._id) setDraftId(data.journal._id);
+      }
       router.push('/journals');
     } catch { /* empty */ }
     setSaving(false);
@@ -79,9 +85,14 @@ export default function NewJournalPage() {
     <div className="max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">New Journal Entry</h1>
-        <button onClick={() => handleSave(true)} disabled={saving} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50">
-          {saving ? 'Saving...' : 'Save Draft'}
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => handleSave(true)} disabled={saving} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 disabled:opacity-50">
+            {saving ? 'Saving...' : 'Save Draft'}
+          </button>
+          <button onClick={() => handleSave(false)} disabled={saving} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50">
+            {saving ? 'Posting...' : 'Post'}
+          </button>
+        </div>
       </div>
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <input
