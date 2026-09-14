@@ -4,22 +4,22 @@ const Category = require('../models/Category');
 
 exports.getDashboard = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;
     const totalJournals = await Journal.countDocuments({ user: userId, isDraft: false });
     const totalDrafts = await Journal.countDocuments({ user: userId, isDraft: true });
     const totalBookmarks = await Journal.countDocuments({ user: userId, isBookmarked: true });
     const totalWords = await Journal.aggregate([
-      { $match: { user: userId._id || userId, isDraft: false } },
+      { $match: { user: userId, isDraft: false } },
       { $group: { _id: null, total: { $sum: '$wordCount' } } }
     ]);
     const recentJournals = await Journal.find({ user: userId }).populate('category', 'name color').sort('-createdAt').limit(5);
     const moodDistribution = await Journal.aggregate([
-      { $match: { user: userId._id || userId, mood: { $exists: true, $ne: '' } } },
+      { $match: { user: userId, isDraft: false, mood: { $exists: true, $ne: '' } } },
       { $group: { _id: '$mood', count: { $sum: 1 } } },
       { $sort: { count: -1 } }
     ]);
     const categoryDistribution = await Journal.aggregate([
-      { $match: { user: userId._id || userId, category: { $exists: true, $ne: null } } },
+      { $match: { user: userId, isDraft: false, category: { $exists: true, $ne: null } } },
       { $group: { _id: '$category', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 5 }
@@ -27,7 +27,8 @@ exports.getDashboard = async (req, res) => {
     const thisMonth = await Journal.aggregate([
       {
         $match: {
-          user: userId._id || userId,
+          user: userId,
+          isDraft: false,
           createdAt: { $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) }
         }
       },
