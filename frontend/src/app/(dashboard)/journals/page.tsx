@@ -16,6 +16,12 @@ interface Journal {
   tags?: { _id: string; name: string; color: string }[];
 }
 
+interface Category {
+  _id: string;
+  name: string;
+  color: string;
+}
+
 const moodEmojis: Record<string, string> = {
   great: '😄', good: '🙂', neutral: '😐', bad: '😔', terrible: '😢'
 };
@@ -27,6 +33,7 @@ export default function JournalsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const fetchJournals = useCallback(async () => {
     setLoading(true);
@@ -41,7 +48,10 @@ export default function JournalsPage() {
     setLoading(false);
   }, [page, search, categoryFilter]);
 
-  useEffect(() => { fetchJournals(); }, [fetchJournals]);
+  useEffect(() => {
+    api.get('/categories').then(data => setCategories(data.categories || []) ).catch(() => setCategories([]));
+    fetchJournals();
+  }, [fetchJournals]);
 
   const togglePin = async (id: string) => {
     await api.put(`/journals/${id}/pin`, {});
@@ -87,10 +97,9 @@ export default function JournalsPage() {
           className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
         >
           <option value="">All Categories</option>
-          <option value="personal">Personal</option>
-          <option value="work">Work</option>
-          <option value="travel">Travel</option>
-          <option value="health">Health</option>
+          {categories.map(category => (
+            <option key={category._id} value={category._id}>{category.name}</option>
+          ))}
         </select>
       </div>
       {loading ? (
