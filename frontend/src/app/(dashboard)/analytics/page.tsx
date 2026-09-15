@@ -6,7 +6,6 @@ interface Dashboard {
   totalJournals: number;
   totalDrafts: number;
   totalBookmarks: number;
-  totalWords: number;
   streak: number;
   recentJournals: { _id: string; title: string; mood: string; createdAt: string; category?: { name: string; color: string } }[];
   moodDistribution: { _id: string; count: number }[];
@@ -33,12 +32,11 @@ export default function AnalyticsPage() {
   return (
     <div className="max-w-5xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Analytics Dashboard</h1>
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
           { label: 'Total Journals', value: dashboard.totalJournals, color: 'bg-indigo-500' },
           { label: 'Drafts', value: dashboard.totalDrafts, color: 'bg-yellow-500' },
           { label: 'Bookmarks', value: dashboard.totalBookmarks, color: 'bg-pink-500' },
-          { label: 'Total Words', value: dashboard.totalWords.toLocaleString(), color: 'bg-green-500' },
           { label: 'Day Streak', value: dashboard.streak, color: 'bg-orange-500' },
         ].map(stat => (
           <div key={stat.label} className="bg-white border border-gray-200 rounded-xl p-4 text-center">

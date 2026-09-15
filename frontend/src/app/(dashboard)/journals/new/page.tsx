@@ -90,7 +90,7 @@ export default function NewJournalPage() {
             {saving ? 'Saving...' : 'Save Draft'}
           </button>
           <button onClick={() => handleSave(false)} disabled={saving} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50">
-            {saving ? 'Posting...' : 'Post'}
+            {saving ? 'Saving...' : 'Save'}
           </button>
         </div>
       </div>

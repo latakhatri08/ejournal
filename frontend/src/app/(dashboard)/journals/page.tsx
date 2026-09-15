@@ -26,20 +26,20 @@ export default function JournalsPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [moodFilter, setMoodFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
 
   const fetchJournals = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ page: String(page), limit: '10', sort: '-isPinned,-createdAt' });
       if (search) params.set('search', search);
-      if (moodFilter) params.set('mood', moodFilter);
+      if (categoryFilter) params.set('category', categoryFilter);
       const data = await api.get(`/journals?${params}`);
       setJournals(data.journals);
       setTotalPages(data.pages);
     } catch { /* empty */ }
     setLoading(false);
-  }, [page, search, moodFilter]);
+  }, [page, search, categoryFilter]);
 
   useEffect(() => { fetchJournals(); }, [fetchJournals]);
 
@@ -82,16 +82,15 @@ export default function JournalsPage() {
           className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
         />
         <select
-          value={moodFilter}
-          onChange={e => { setMoodFilter(e.target.value); setPage(1); }}
+          value={categoryFilter}
+          onChange={e => { setCategoryFilter(e.target.value); setPage(1); }}
           className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
         >
-          <option value="">All Moods</option>
-          <option value="great">Great</option>
-          <option value="good">Good</option>
-          <option value="neutral">Neutral</option>
-          <option value="bad">Bad</option>
-          <option value="terrible">Terrible</option>
+          <option value="">All Categories</option>
+          <option value="personal">Personal</option>
+          <option value="work">Work</option>
+          <option value="travel">Travel</option>
+          <option value="health">Health</option>
         </select>
       </div>
       {loading ? (
