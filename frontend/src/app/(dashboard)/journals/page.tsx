@@ -10,6 +10,7 @@ interface Journal {
   mood: string;
   isPinned: boolean;
   isBookmarked: boolean;
+  isDraft: boolean;
   wordCount: number;
   createdAt: string;
   category?: { name: string; color: string };
@@ -126,6 +127,11 @@ export default function JournalsPage() {
                     <Link href={`/journals/${journal._id}/edit`} className="text-lg font-semibold text-gray-900 hover:text-indigo-600 truncate">
                       {journal.title}
                     </Link>
+                    {journal.isDraft && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-700 border border-amber-200">
+                        Draft
+                      </span>
+                    )}
                   </div>
                   <p className="text-gray-500 text-sm line-clamp-2 mb-2">
                     {journal.plainText?.substring(0, 150) || 'No content'}
