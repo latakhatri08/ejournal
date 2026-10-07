@@ -9,7 +9,13 @@ interface Journal {
   mood: string;
   isPinned: boolean;
   createdAt: string;
-  category?: { name: string; color: string } | null;
+  category?: string | { _id?: string; name?: string; color?: string } | null;
+}
+
+interface Category {
+  _id: string;
+  name: string;
+  color: string;
 }
 
 const moodEmojis: Record<string, string> = { great: '😄', good: '🙂', neutral: '😐', bad: '😔', terrible: '😢' };
@@ -17,6 +23,7 @@ const moodEmojis: Record<string, string> = { great: '😄', good: '🙂', neutra
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [journals, setJournals] = useState<Journal[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
   const year = currentDate.getFullYear();
@@ -26,11 +33,16 @@ export default function CalendarPage() {
     api.get(`/journals/calendar?year=${year}&month=${month + 1}`).then(d => setJournals(d.journals)).catch(() => {});
   }, [year, month]);
 
+  useEffect(() => {
+    api.get('/categories').then(d => setCategories(d.categories)).catch(() => {});
+  }, []);
+
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const today = new Date();
 
   const journalsByDay: Record<number, Journal[]> = {};
+  const categoriesById = new Map(categories.map(category => [category._id, category]));
   journals.forEach(j => {
     const day = new Date(j.createdAt).getDate();
     if (!journalsByDay[day]) journalsByDay[day] = [];
@@ -68,18 +80,24 @@ export default function CalendarPage() {
               <div key={day} onClick={() => setSelectedDay(selectedDay === day ? null : day)} className={`bg-white min-h-[80px] p-1.5 cursor-pointer hover:bg-indigo-50 transition-colors ${isToday ? 'ring-2 ring-indigo-500' : ''} ${selectedDay === day ? 'bg-indigo-50' : ''}`}>
                 <span className={`text-sm font-medium ${isToday ? 'text-indigo-600' : 'text-gray-700'}`}>{day}</span>
                 <div className="mt-1 space-y-0.5">
-                  {dayJournals.slice(0, 3).map(j => (
-                    <Link
-                      key={j._id}
-                      href={`/journals/${j._id}/edit`}
-                      onClick={e => e.stopPropagation()}
-                      className={`block text-[10px] truncate rounded px-1 py-0.5 ${j.category ? 'text-white' : 'bg-gray-100 text-gray-700'}`}
-                      style={j.category ? { backgroundColor: j.category.color } : undefined}
-                      title={j.category?.name || j.title}
-                    >
-                      {moodEmojis[j.mood] || ''} {j.title}
-                    </Link>
-                  ))}
+                  {dayJournals.slice(0, 3).map(j => {
+                    const categoryId = typeof j.category === 'string' ? j.category : j.category?._id;
+                    const category = (typeof j.category === 'object' && j.category) || (categoryId ? categoriesById.get(categoryId) : undefined);
+                    const categoryColor = category?.color || (categoryId ? categoriesById.get(categoryId)?.color : undefined);
+                    const hasCategory = Boolean(categoryId || j.category);
+                    return (
+                      <Link
+                        key={j._id}
+                        href={`/journals/${j._id}/edit`}
+                        onClick={e => e.stopPropagation()}
+                        className={`block text-[10px] truncate rounded px-1 py-0.5 ${hasCategory ? 'text-white' : 'bg-gray-100 text-gray-700'}`}
+                        style={hasCategory ? { backgroundColor: categoryColor || '#6366f1' } : undefined}
+                        title={category?.name || j.title}
+                      >
+                        {moodEmojis[j.mood] || ''} {j.title}
+                      </Link>
+                    );
+                  })}
                   {dayJournals.length > 3 && <span className="text-[10px] text-gray-400">+{dayJournals.length - 3} more</span>}
                 </div>
               </div>

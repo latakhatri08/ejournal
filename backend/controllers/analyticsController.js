@@ -18,23 +18,14 @@ exports.getDashboard = async (req, res) => {
       { $group: { _id: '$mood', count: { $sum: 1 } } },
       { $sort: { count: -1 } }
     ]);
-    const categoryCounts = await Journal.aggregate([
-      { $match: { user: userId, isDraft: false, category: { $exists: true, $ne: null } } },
-      { $group: { _id: '$category', count: { $sum: 1 } } },
-      { $sort: { count: -1 } }
-    ]);
     const categories = await Category.find({ user: userId }).select('_id name color').lean();
-    const countsByCategory = new Map(categoryCounts.map(category => [String(category._id), category.count]));
-    const categoriesWithCounts = categories
-      .map(category => {
-        const count = countsByCategory.get(String(category._id)) || 0;
-        return {
-          _id: String(category._id),
-          name: category.name,
-          color: category.color,
-          count
-        };
-      })
+    const categoriesWithCounts = await Promise.all(categories.map(async category => ({
+      _id: String(category._id),
+      name: category.name,
+      color: category.color,
+      count: await Journal.countDocuments({ user: userId, category: category._id })
+    })));
+    categoriesWithCounts
       .sort((a, b) => b.count - a.count);
     const categorizedJournalCount = categoriesWithCounts.reduce((total, category) => total + category.count, 0);
     const categoryDistribution = categoriesWithCounts.map(category => ({

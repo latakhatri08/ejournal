@@ -19,13 +19,17 @@ const moodEmojis: Record<string, string> = { great: '😄', good: '🙂', neutra
 export default function AnalyticsPage() {
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    api.get('/analytics/dashboard').then(d => { setDashboard(d.dashboard); setLoading(false); }).catch(() => setLoading(false));
+    api.get('/analytics/dashboard')
+      .then(d => setDashboard(d.dashboard))
+      .catch(error => setError(error instanceof Error ? error.message : 'Failed to load analytics'))
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <div className="text-center py-12 text-gray-500">Loading analytics...</div>;
-  if (!dashboard) return <div className="text-center py-12 text-gray-500">Failed to load analytics</div>;
+  if (error || !dashboard) return <div role="alert" className="text-center py-12 text-red-600">{error || 'Failed to load analytics'}</div>;
 
   const maxMood = Math.max(...dashboard.moodDistribution.map(m => m.count), 1);
   const maxMonthly = Math.max(...dashboard.monthlyActivity.map(m => m.count), 1);
