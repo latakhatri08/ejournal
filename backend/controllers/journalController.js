@@ -145,7 +145,7 @@ exports.getCalendarJournals = async (req, res) => {
     const journals = await Journal.find({
       user: req.user.id,
       createdAt: { $gte: startDate, $lte: endDate }
-    }).select('title mood createdAt isPinned').sort('createdAt');
+    }).select('title mood createdAt isPinned category').populate('category', 'name color').sort('createdAt');
     res.json({ success: true, journals });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

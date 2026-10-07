@@ -3,7 +3,14 @@ import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import Link from 'next/link';
 
-interface Journal { _id: string; title: string; mood: string; isPinned: boolean; createdAt: string; }
+interface Journal {
+  _id: string;
+  title: string;
+  mood: string;
+  isPinned: boolean;
+  createdAt: string;
+  category?: { name: string; color: string } | null;
+}
 
 const moodEmojis: Record<string, string> = { great: '😄', good: '🙂', neutral: '😐', bad: '😔', terrible: '😢' };
 
@@ -31,10 +38,6 @@ export default function CalendarPage() {
   });
 
   const prevMonth = () => setCurrentDate(new Date(year, month - 1));
-  const nextMonth = () => setCurrentDate(new Date(year, month + 1));
-
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
@@ -66,7 +69,14 @@ export default function CalendarPage() {
                 <span className={`text-sm font-medium ${isToday ? 'text-indigo-600' : 'text-gray-700'}`}>{day}</span>
                 <div className="mt-1 space-y-0.5">
                   {dayJournals.slice(0, 3).map(j => (
-                    <Link key={j._id} href={`/journals/${j._id}/edit`} onClick={e => e.stopPropagation()} className="block text-[10px] truncate bg-indigo-100 text-indigo-700 rounded px-1 py-0.5 hover:bg-indigo-200">
+                    <Link
+                      key={j._id}
+                      href={`/journals/${j._id}/edit`}
+                      onClick={e => e.stopPropagation()}
+                      className={`block text-[10px] truncate rounded px-1 py-0.5 ${j.category ? 'text-white' : 'bg-gray-100 text-gray-700'}`}
+                      style={j.category ? { backgroundColor: j.category.color } : undefined}
+                      title={j.category?.name || j.title}
+                    >
                       {moodEmojis[j.mood] || ''} {j.title}
                     </Link>
                   ))}

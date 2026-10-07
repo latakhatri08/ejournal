@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import SpeechToTextButton from '@/components/journals/SpeechToTextButton';
 
 interface Category { _id: string; name: string; color: string; }
 interface Tag { _id: string; name: string; color: string; }
@@ -106,6 +107,12 @@ export default function EditJournalPage({ params }: { params: Promise<{ id: stri
       </div>
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <input type="text" placeholder="Journal title..." value={title} onChange={e => setTitle(e.target.value)} className="w-full px-6 py-4 text-xl font-semibold border-b border-gray-200 outline-none" />
+        <SpeechToTextButton
+          onTranscript={transcript => {
+            const separator = content && !/\s$/.test(content) ? ' ' : '';
+            handleContentChange(`${content}${separator}${transcript}`);
+          }}
+        />
         <textarea placeholder="Start writing..." value={content} onChange={e => handleContentChange(e.target.value)} className="w-full px-6 py-4 min-h-[400px] outline-none resize-none text-gray-700 leading-relaxed" />
       </div>
       <div className="bg-white border border-gray-200 rounded-xl mt-4 p-5">

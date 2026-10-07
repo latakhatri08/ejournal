@@ -9,6 +9,7 @@ interface Dashboard {
   streak: number;
   recentJournals: { _id: string; title: string; mood: string; createdAt: string; category?: { name: string; color: string } }[];
   moodDistribution: { _id: string; count: number }[];
+  categoryDistribution: { _id: string; name: string; color: string; count: number; percentage: number }[];
   monthlyActivity: { _id: number; count: number }[];
 }
 
@@ -80,6 +81,26 @@ export default function AnalyticsPage() {
             </div>
           )}
         </div>
+      </div>
+      <div className="bg-white border border-gray-200 rounded-xl p-5 mb-8">
+        <h3 className="font-semibold text-gray-900 mb-4">Journals by Category</h3>
+        {dashboard.categoryDistribution.length === 0 ? (
+          <p className="text-gray-400 text-sm text-center py-4">No categories yet</p>
+        ) : dashboard.categoryDistribution.every(category => category.count === 0) ? (
+          <p className="text-gray-400 text-sm text-center py-4">No categorized journals yet</p>
+        ) : (
+          <div className="space-y-3">
+            {dashboard.categoryDistribution.map(category => (
+              <div key={category._id} className="flex items-center gap-3">
+                <span className="text-sm text-gray-700 w-28 truncate" title={category.name}>{category.name}</span>
+                <div className="flex-1 bg-gray-100 rounded-full h-5 overflow-hidden">
+                  <div className="h-full rounded-full transition-all" style={{ width: `${category.percentage}%`, backgroundColor: category.color }} />
+                </div>
+                <span className="text-sm text-gray-500 w-24 text-right">{category.count} ({category.percentage}%)</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       <div className="bg-white border border-gray-200 rounded-xl p-5">
         <h3 className="font-semibold text-gray-900 mb-4">Recent Journals</h3>

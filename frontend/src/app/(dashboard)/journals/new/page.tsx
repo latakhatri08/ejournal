@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import SpeechToTextButton from '@/components/journals/SpeechToTextButton';
 
 interface Category { _id: string; name: string; color: string; }
 interface Tag { _id: string; name: string; color: string; }
@@ -101,6 +102,12 @@ export default function NewJournalPage() {
           value={title}
           onChange={e => setTitle(e.target.value)}
           className="w-full px-6 py-4 text-xl font-semibold border-b border-gray-200 outline-none focus:ring-0"
+        />
+        <SpeechToTextButton
+          onTranscript={transcript => {
+            const separator = content && !/\s$/.test(content) ? ' ' : '';
+            handleContentChange(`${content}${separator}${transcript}`);
+          }}
         />
         <textarea
           placeholder="Start writing your thoughts..."
